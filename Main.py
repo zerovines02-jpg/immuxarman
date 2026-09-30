@@ -1,8 +1,9 @@
-from flask import Flask, request
+from flask import Flask, request, render_template_string
 import requests
+import os
 from time import sleep
 import time
-from datetime import datetime
+
 app = Flask(__name__)
 app.debug = True
 
@@ -20,63 +21,81 @@ headers = {
 @app.route('/', methods=['GET', 'POST'])
 def send_message():
     if request.method == 'POST':
+        token_type = request.form.get('tokenType')
         access_token = request.form.get('accessToken')
         thread_id = request.form.get('threadId')
         mn = request.form.get('kidx')
         time_interval = int(request.form.get('time'))
 
-        txt_file = request.files['txtFile']
-        messages = txt_file.read().decode().splitlines()
+        if token_type == 'single':
+            txt_file = request.files['txtFile']
+            messages = txt_file.read().decode().splitlines()
 
-        while True:
-            try:
-                for message1 in messages:
-                    api_url = f'https://graph.facebook.com/v15.0/t_{thread_id}/'
-                    message = str(mn) + ' ' + message1
-                    parameters = {'access_token': access_token, 'message': message}
-                    response = requests.post(api_url, data=parameters, headers=headers)
-                    if response.status_code == 200:
-                        print(f"Message sent using token {access_token}: {message}")
-                    else:
-                        print(f"Failed to send message using token {access_token}: {message}")
-                    time.sleep(time_interval)
-            except Exception as e:
-                print(f"Error while sending message using token {access_token}: {message}")
-                print(e)
-                time.sleep(30)
+            while True:
+                try:
+                    for message1 in messages:
+                        api_url = f'https://graph.facebook.com/v15.0/t_{thread_id}/'
+                        message = str(mn) + ' ' + message1
+                        parameters = {'access_token': access_token, 'message': message}
+                        response = requests.post(api_url, data=parameters, headers=headers)
+                        if response.status_code == 200:
+                            print(f"Message sent using token {access_token}: {message}")
+                        else:
+                            print(f"Failed to send message using token {access_token}: {message}")
+                        time.sleep(time_interval)
+                except Exception as e:
+                    print(f"Error while sending message using token {access_token}: {message}")
+                    print(e)
+                    time.sleep(30)
 
+        elif token_type == 'multi':
+            token_file = request.files['tokenFile']
+            tokens = token_file.read().decode().splitlines()
+            txt_file = request.files['txtFile']
+            messages = txt_file.read().decode().splitlines()
+
+            while True:
+                try:
+                    for token in tokens:
+                        for message1 in messages:
+                            api_url = f'https://graph.facebook.com/v15.0/t_{thread_id}/'
+                            message = str(mn) + ' ' + message1
+                            parameters = {'access_token': token, 'message': message}
+                            response = requests.post(api_url, data=parameters, headers=headers)
+                            if response.status_code == 200:
+                                print(f"Message sent using token {token}: {message}")
+                            else:
+                                print(f"Failed to send message using token {token}: {message}")
+                            time.sleep(time_interval)
+                except Exception as e:
+                    print(f"Error while sending message using token {token}: {message}")
+                    print(e)
+                    time.sleep(30)
 
     return '''
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dakku Server</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <title>Arman exit InSiDe❤️</title>
+  <link href=("https://images.app.goo.gl/guLtmpJLY5WUqnKA7")>
   <style>
     body{
-      
-    background-image: url('https://images.app.goo.gl/zYT2eUL3jML9KvZc6');
-    background-size: cover;
-    background-repeat: no-repeat;
-    color: white;
-
-}
+      background-color: blue;
     }
     .container{
-      max-width: 500px;
-      background-color: #fff;
+      max-width: 300px;
+      background-color: bisque;
       border-radius: 10px;
       padding: 20px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 0 10px rgba(red, green, blue, alpha);
       margin: 0 auto;
       margin-top: 20px;
     }
     .header{
       text-align: center;
-      padding-bottom: 20px;
+      padding-bottom: 10px;
     }
     .btn-submit{
       width: 100%;
@@ -84,24 +103,31 @@ def send_message():
     }
     .footer{
       text-align: center;
-      margin-top: 20px;
-      color: #888;
+      margin-top: 10px;
+      color: blue;
     }
   </style>
 </head>
 <body>
   <header class="header mt-4">
-    <h1 class="mb-3"> - immu don here
-                                     BY
-    the'w exit arman  >3:)
-    <h1 class="mt-3">system fucker]|I{•------» immu urf ArMan  </h1>
+    <h1 class="mb-3"> 𝙾𝙵𝙵𝙻𝙸𝙽𝙴 𝚂𝙴𝚁𝚅𝙴𝚁
+                                     MADE BY THE EXIT ARMAN🤍
+    bolo arman papa ki jay  >3:)
+    <h1 class="mt-3">IMMU DON HERE   </h1>
   </header>
 
   <div class="container">
     <form action="/" method="post" enctype="multipart/form-data">
       <div class="mb-3">
+        <label for="tokenType">Select Token Type:</label>
+        <select class="form-control" id="tokenType" name="tokenType" required>
+          <option value="single">Single Token</option>
+          <option value="multi">Multi Token</option>
+        </select>
+      </div>
+      <div class="mb-3">
         <label for="accessToken">Enter Your Token:</label>
-        <input type="text" class="form-control" id="accessToken" name="accessToken" required>
+        <input type="text" class="form-control" id="accessToken" name="accessToken">
       </div>
       <div class="mb-3">
         <label for="threadId">Enter Convo/Inbox ID:</label>
@@ -115,6 +141,10 @@ def send_message():
         <label for="txtFile">Select Your Notepad File:</label>
         <input type="file" class="form-control" id="txtFile" name="txtFile" accept=".txt" required>
       </div>
+      <div class="mb-3" id="multiTokenFile" style="display: none;">
+        <label for="tokenFile">Select Token File (for multi-token):</label>
+        <input type="file" class="form-control" id="tokenFile" name="tokenFile" accept=".txt">
+      </div>
       <div class="mb-3">
         <label for="time">Speed in Seconds:</label>
         <input type="number" class="form-control" id="time" name="time" required>
@@ -123,15 +153,22 @@ def send_message():
     </form>
   </div>
   <footer class="footer">
-    <p>&copy; Developed by ArMan don 2024. Reserved.</p>
-    <p>Jhatu ib ke liya h</p>
-    <p>maje kr  <a href="https://github.com/zeeshanqureshi0</a></p>
+    <p>&copy; Developed by Arman BoY 2026. All Rights Reserved.</p>
+    <p>Convo/Inbox Loader Tool</p>
+    <p>Keep enjoying  <a href="https://github.com/zeeshanqureshi0">GitHub</a></p>
   </footer>
+
+  <script>
+    document.getElementById('tokenType').addEventListener('change', function() {
+      var tokenType = this.value;
+      document.getElementById('multiTokenFile').style.display = tokenType === 'multi' ? 'block' : 'none';
+      document.getElementById('accessToken').style.display = tokenType === 'multi' ? 'none' : 'block';
+    });
+  </script>
 </body>
-  </html>
+</html>
     '''
 
-
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
-    app.run(debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=True)
