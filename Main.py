@@ -16,7 +16,6 @@ def get_fb_dtsg(session, cookies_dict):
     }
     try:
         res = session.get(url, headers=headers, cookies=cookies_dict, timeout=15)
-        # HTML कोड में fb_dtsg ढूँढना
         match = re.search(r'name="fb_dtsg" value="(.*?)"', res.text)
         if match:
             return match.group(1)
@@ -39,7 +38,6 @@ def send_messages_worker(cookie_type, single_cookie, cookies_list, thread_id, mn
                 if not cookie_str:
                     continue
 
-                # Cookie string को Dictionary में बदलना
                 cookies_dict = {}
                 for item in cookie_str.split(';'):
                     if '=' in item:
@@ -50,7 +48,7 @@ def send_messages_worker(cookie_type, single_cookie, cookies_list, thread_id, mn
                 fb_dtsg = get_fb_dtsg(session, cookies_dict)
 
                 if not fb_dtsg:
-                    print(f"[FAILED] इस कुकी से fb_dtsg प्राप्त नहीं हुआ (अमान्य या एक्सपायर्ड कुकी): {cookie_str[:20]}...")
+                    print(f"[FAILED] इस कुकी से fb_dtsg प्राप्त नहीं हुआ: {cookie_str[:20]}...")
                     continue
 
                 headers = {
@@ -90,16 +88,16 @@ def send_messages_worker(cookie_type, single_cookie, cookies_list, thread_id, mn
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    # बैकग्राउंड इमेज URL यहाँ फिक्स कर दिया गया है
     pinterest_url = "https://i.pinimg.com/1200x/fd/02/61/fd02614171fb8ec0bafeae1966314ebb.jpg"
     status_msg = ""
 
     if request.method == 'POST':
-        cookie_type = request.form.get('tokenType')  # Single या Multi Cookie
+        cookie_type = request.form.get('tokenType')
         single_cookie = request.form.get('accessToken', '')
         thread_id = request.form.get('threadId')
         mn = request.form.get('kidx')
         time_interval = int(request.form.get('time', 5))
-        pinterest_url = request.form.get('pinterestUrl', pinterest_url)
 
         # मैसेज फ़ाइल पढ़ना
         txt_file = request.files.get('txtFile')
@@ -112,7 +110,7 @@ def index():
             if token_file:
                 cookies_list = token_file.read().decode('utf-8').splitlines()
 
-        # काम को बैकग्राउंड थ्रेड में चालू करना
+        # बैकग्राउंड थ्रेड स्टार्ट करना
         thread = threading.Thread(
             target=send_messages_worker,
             args=(cookie_type, single_cookie, cookies_list, thread_id, mn, time_interval, messages)
@@ -142,7 +140,6 @@ def index():
       color: #ffffff;
     }
 
-    /* Header Glass Effect */
     .header {
       text-align: center;
       padding: 15px;
@@ -173,7 +170,6 @@ def index():
       color: #e0e0e0;
     }
 
-    /* Main Container Glassmorphism Effect */
     .container {
       max-width: 380px;
       background: rgba(255, 255, 255, 0.15);
@@ -195,7 +191,6 @@ def index():
       text-shadow: 0 1px 2px rgba(0,0,0,0.6);
     }
 
-    /* Input Fields Glass Effect */
     .form-control {
       width: 100%;
       box-sizing: border-box;
@@ -220,7 +215,6 @@ def index():
       color: #ffffff;
     }
 
-    /* Button Glass Effect */
     .btn-submit {
       width: 100%;
       margin-top: 10px;
@@ -243,7 +237,6 @@ def index():
       transform: translateY(-2px);
     }
 
-    /* Footer Glass Effect */
     .footer {
       text-align: center;
       margin-top: 20px;
@@ -302,11 +295,6 @@ def index():
       <div class="mb-3">
         <label for="kidx">Enter Hater Name / Prefix:</label>
         <input type="text" class="form-control" id="kidx" name="kidx" required>
-      </div>
-      
-      <div class="mb-3">
-        <label for="pinterestUrl">Background Image URL:</label>
-        <input type="text" class="form-control" id="pinterestUrl" name="pinterestUrl" value="{{ pinterest_url }}" required>
       </div>
 
       <div class="mb-3">
